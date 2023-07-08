@@ -3,6 +3,7 @@ import tkinter.messagebox as messagebox
 import customtkinter as ctk
 import asyncio
 import utils.sql.load_database as database
+import utils.sql.login as lg
 
 
 class Todo(ctk.CTk):
@@ -13,10 +14,10 @@ class Todo(ctk.CTk):
         self.geometry("500x500")
         self.resizable(False, False)
         self.logged_in = False
-        self.protocol("WM_DELETE_WINDOW",lambda: database.quit(self, self.db))
-        self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW",lambda: database.quit_app(self, self.db))
+        self.create_login_screen()
 
-    def create_widgets(self):
+    def create_login_screen(self):
         login_screen_frame = ctk.CTkFrame(self)
         login_screen_frame.place(anchor="c", relx=.5, rely=.5)
 
@@ -38,18 +39,8 @@ class Todo(ctk.CTk):
         login_button.grid(row=2, column=0, columnspan=2)
 
     async def check_login(self, user_login, password):
-        # TODO: Implement the login check with MySQL asynchronously
-        # Simulating an asynchronous task with a sleep
-        await asyncio.sleep(2)
-
-        if user_login == "example@gmail.com" and password == "password":
-            return "SUCCESS"
-        elif not user_login:
-            return "INVALID_USERNAME OR EMAIL"
-        elif not password:
-            return "INVALID_PASSWORD"
-        else:
-            return "INVALID_CREDENTIALS"
+        login = lg.login(self.db, user_login, password)
+        return login
 
     async def handle_login(self):
         user_login = self.login_texbox.get()
@@ -57,10 +48,10 @@ class Todo(ctk.CTk):
 
         result = await self.check_login(user_login, password)
 
-        if result == tuple:
+        if type(result) == tuple:
             self.logged_in = True
             messagebox.showinfo("Login Success", "Logged in successfully!")
-        elif result == "INVALID_USERNAME OR EMAIL":
+        elif result == "INVALID_USERNAME_OR_EMAIL":
             messagebox.showerror("Login Error", "Make sure to include a valid username or email")
         elif result == "INVALID_PASSWORD":
             messagebox.showerror("Login Error", "Make sure to include a valid password")

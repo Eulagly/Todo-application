@@ -1,15 +1,16 @@
 from tkinter import messagebox
 import mysql.connector
 import customtkinter
-
-
+import os
+from dotenv import load_dotenv
 class ToDoMysql:
     def __init__(self):
+        load_dotenv()
         self.connector = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="Eula",
-            database="todo"
+            host=os.getenv("SQL_HOST"),
+            user=os.getenv("SQL_USERNAME"),
+            password=os.getenv("SQL_PASSWORD"),
+            database=os.getenv("SQL_DATABASE")
         )
 
         self.cursor = self.connector.cursor()
