@@ -1,77 +1,78 @@
 import tkinter as tk
-import customtkinter as ctk
 import tkinter.messagebox as messagebox
+import customtkinter as ctk
+import asyncio
+import utils.sql.load_database as database
+
 
 class Todo(ctk.CTk):
     def __init__(self):
         super().__init__()
-
+        self.db = database.load()
         self.title("TO-DO")
         self.geometry("500x500")
         self.resizable(False, False)
         self.logged_in = False
+        self.protocol("WM_DELETE_WINDOW",lambda: database.quit(self, self.db))
+        self.create_widgets()
 
-        information_frame = ctk.CTkFrame(self)
-        information_frame.place(anchor="c", relx=.5, rely=.5)
+    def create_widgets(self):
+        login_screen_frame = ctk.CTkFrame(self)
+        login_screen_frame.place(anchor="c", relx=.5, rely=.5)
 
-        self.login = ctk.CTkLabel(information_frame, text="LOGIN: ", text_color="white", font=("arial", 30, "bold"))
+        self.login = ctk.CTkLabel(login_screen_frame, text="LOGIN: ", text_color="white",
+                                  font=("arial", 30, "bold"))
         self.login.grid(row=0, column=0, sticky="E")
-        self.login_texbox = ctk.CTkEntry(information_frame, placeholder_text="Username or Email", fg_color="White")
+        self.login_texbox = ctk.CTkEntry(login_screen_frame, placeholder_text="Username or Email",
+                                          fg_color="White")
         self.login_texbox.grid(row=0, column=1)
 
-        self.password = ctk.CTkLabel(information_frame, text="PASSWORD: ", text_color="white", font=("arial", 30, "bold"))
+        self.password = ctk.CTkLabel(login_screen_frame, text="PASSWORD: ", text_color="white",
+                                     font=("arial", 30, "bold"))
         self.password.grid(row=1, column=0, sticky="E")
-        self.password_texbox = ctk.CTkEntry(information_frame, placeholder_text="Password", fg_color="White")
+        self.password_texbox = ctk.CTkEntry(login_screen_frame, placeholder_text="Password",
+                                             fg_color="White")
         self.password_texbox.grid(row=1, column=1)
 
-        login_button = ctk.CTkButton(information_frame, text="LOGIN",
-                                    command=self.login_to_app)
+        login_button = ctk.CTkButton(login_screen_frame, text="LOGIN", command=self.login_to_app)
         login_button.grid(row=2, column=0, columnspan=2)
 
-    def login_to_app(self):
+    async def check_login(self, user_login, password):
+        # TODO: Implement the login check with MySQL asynchronously
+        # Simulating an asynchronous task with a sleep
+        await asyncio.sleep(2)
+
+        if user_login == "example@gmail.com" and password == "password":
+            return "SUCCESS"
+        elif not user_login:
+            return "INVALID_USERNAME OR EMAIL"
+        elif not password:
+            return "INVALID_PASSWORD"
+        else:
+            return "INVALID_CREDENTIALS"
+
+    async def handle_login(self):
         user_login = self.login_texbox.get()
         password = self.password_texbox.get()
 
-        if user_login == '':
-            messagebox.showerror("Login Error", "Make sure to include a valid username")
-            pass
-        elif password == '':
+        result = await self.check_login(user_login, password)
+
+        if result == tuple:
+            self.logged_in = True
+            messagebox.showinfo("Login Success", "Logged in successfully!")
+        elif result == "INVALID_USERNAME OR EMAIL":
+            messagebox.showerror("Login Error", "Make sure to include a valid username or email")
+        elif result == "INVALID_PASSWORD":
             messagebox.showerror("Login Error", "Make sure to include a valid password")
-            pass
-        elif "@" in user_login:
-            login_type = "email"
         else:
-            login_type = "username"
-
-
-
-        # Perform MySQL check if the login is legitimate.
-        # If it is, set self.logged_in to True.
-        # If it's not, the return value will be "PASS ERROR" or "EMAIL OR USERNAME ERROR".
-        # If the error is "PASS ERROR", clear the password and show an error message.
-        # If the error is "EMAIL OR USERNAME ERROR", clear both the login box and the password box and show an error message.
-
-        # Example implementation:
-        # if login_type == "email":
-        #     # Check login using email
-        # else:
-        #     # Check login using username
-
-        # TODO: Implement the login check with MySQL
-
-        # For testing purposes, let's assume the login is not successful
-        error_message = "EMAIL OR USERNAME ERROR" if login_type == "email" else "PASS ERROR"
-        if error_message == "PASS ERROR":
-            password = ''
-            messagebox.showerror("Login Error", "Invalid password. Please try again.")
-        elif error_message == "EMAIL OR USERNAME ERROR":
             self.login_texbox.delete(0, tk.END)
             self.password_texbox.delete(0, tk.END)
-            messagebox.showerror("Login Error", "Invalid email or username. Please try again.")
+            messagebox.showerror("Login Error", "Invalid email or password. Please try again.")
 
-        # Clear the login and password entry fields
-        self.login_texbox.delete(0, tk.END)
-        self.password_texbox.delete(0, tk.END)
+    def login_to_app(self):
+        asyncio.run(self.handle_login())
+
+
 
 if __name__ == "__main__":
     todo = Todo()
