@@ -1,2 +1,2 @@
 customtkinter
-mysql
+mysql-connector-python
