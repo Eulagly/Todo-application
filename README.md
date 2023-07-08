@@ -51,6 +51,3 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-```
-
-Feel free to customize the content and structure of the `README.md` file according to your specific needs.
