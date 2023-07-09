@@ -89,7 +89,12 @@ class Todo(ctk.CTk):
         username = self.signup_texbox.get()
         email = self.email_texbox.get()
         password = self.password_texbox_signup.get()
-
+        if not username or not email or not password:
+            messagebox.showinfo("Fields", "Make sure to fill out all fields.")
+            return
+        if '@' not in email or '.' not in email:
+            messagebox.showinfo("Invalid Email", "Make sure to give a valid email")
+            return
         result = await self.check_signup(username, email, password)
 
         if type(result) == int:
