@@ -5,6 +5,5 @@ def hash_password(password: str | bytes):
         password = password.encode()
 
     hash_password = hashlib.sha256()
-    hash_password.update(b"Nobody inspects")
-    hash_password.update(b" the spammish repetition")
+    hash_password.update(password)
     return hash_password.digest()

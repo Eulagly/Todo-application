@@ -18,17 +18,24 @@ def login(db: ToDoMysql, user_login: str, password: str) -> typing.Union[typing.
 def signup(db: ToDoMysql, email: str, username: str, password: str):
     query = "SELECT * FROM user_info WHERE email = %s"
     params = (email, )
+    db.cursor.execute(query, params)
     row = db.cursor.fetchone()
     if row:
-        return "ACCOUNT_EMAIL_EXIST"
+        return "EMAIL_TAKEN"
     else:
         query = "SELECT * FROM user_info WHERE username = %s"
         params = (username, )
+        db.cursor.execute(query, params)
         row = db.cursor.fetchone()
         if row:
-            return "ACCOUNT_USERNAME_EXIST"
+            return "USERNAME_TAKEN"
         else:
             query = "INSERT INTO user_info (email, username, password) VALUES (%s, %s, %s)"
             params = (email, username, hash_password(password))
             db.cursor.execute(query, params)
-
+            db.connector.commit()
+            query = "SELECT id FROM user_info WHERE username = %s"
+            params = (username, )
+            db.cursor.execute(query, params)
+            row = db.cursor.fetchone()
+            return (row[0])
